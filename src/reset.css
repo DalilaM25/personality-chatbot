@@ -1,0 +1,40 @@
+/* src/assets/reset.css */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Всегда учитывайте внутренние отступы и границы */
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  line-height: 1.5; /* Устанавливаем стандартную высоту строки */
+  -webkit-font-smoothing: antialiased; /* Сглаживание шрифтов на WebKit */
+  -moz-osx-font-smoothing: grayscale; /* Сглаживание шрифтов на Gecko/macOS */
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block; /* Изображения и медиа не должны выходить за пределы своего блока */
+  max-width: 100%; /* Изображения не должны превышать ширину своего контейнера */
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit; /* Все элементы ввода наследуют шрифт от родителя */
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word; /* Разрывайте длинные слова, чтобы они не выходили за пределы */
+}

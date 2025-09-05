@@ -1,6 +1,6 @@
 <template>
   <div class="typing-indicator">
-    <strong >{{ Personalities[person] }}: </strong>
+    <strong >{{ person }}: </strong>
     <span class="typing-text">печатает</span>
     <span class="typing-dots">
       <span>.</span>
@@ -12,10 +12,9 @@
 
 <script lang="ts" setup>
 
-import type { PersonalityKey } from '@/types/chatTypes';
-import {Personalities} from './ChatBot/personality'
+import type { PersonalityKeyT } from '@/types/chatTypes';
 interface Props {
-  person: PersonalityKey;
+  person: string | PersonalityKeyT;
 }
 
 const { person } = defineProps<Props>()

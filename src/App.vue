@@ -7,4 +7,5 @@ import ChatBot from './components/ChatBot/ChatBot.vue'
   <ChatBot/>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

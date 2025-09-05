@@ -1,71 +1,62 @@
-import { ref, reactive } from 'vue';
-import type { Message, UseChatResultT } from '@/types/chatTypes';
-import { getPrompt } from '@/components/ChatBot/personality';
+import type { Message, UseChatResultT } from '@/types/chatTypes'
+import { getPrompt } from '@/components/ChatBot/personality'
+import type { useChatStore } from '@/stores/chatStore'
 
-const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
+const API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY
 
-
-
-export const useChat = (person: string): UseChatResultT => {
-  const userInput = ref('');
-  const messages = reactive<Message[]>([]);
-  const isLoading = ref(false);
-
+export const useChat = (store: ReturnType<typeof useChatStore>): UseChatResultT => {
   const sendMessage = async () => {
-    if (!userInput.value.trim() || isLoading.value) return;
+    if (!store.userInput.trim() || store.isLoading) return
 
-    const userMessage: Message = { role: 'user', content: userInput.value };
-    messages.push(userMessage);
-    userInput.value = '';
-    isLoading.value = true;
+    const userMessage: Message = { role: 'user', content: store.userInput }
+    store.addMessage(userMessage)
+    store.setUserInput('')
+    store.setLoading(true)
 
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${API_KEY}`,
-    'Content-Type': 'application/json',
-    'HTTP-Referer': window.location.origin,
-    'X-Title': 'Sherlock Chat Bot',
-  },
+          Authorization: `Bearer ${API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Sherlock Chat Bot',
+        },
         body: JSON.stringify({
           model: 'deepseek/deepseek-chat-v3.1:free',
           messages: [
-            { role: 'system', content: getPrompt(person) },
-            ...messages.filter(msg => msg.role !== 'system')
-          ]
-        })
-      });
+            { role: 'system', content: getPrompt(store.currentPersonality) },
+            ...store.messages.filter((msg) => msg.role !== 'system'),
+          ],
+        }),
+      })
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
 
-      const data = await response.json();
-      messages.push({ role: 'assistant', content: data.choices[0].message.content });
+      const data = await response.json()
+      store.addMessage({ role: 'assistant', content: data.choices[0].message.content })
     } catch (error) {
-      handleError(error);
+      handleError(error)
     } finally {
-      isLoading.value = false;
+      store.setLoading(false)
     }
-  };
+  }
 
   const handleError = (error: unknown) => {
-    let errorMessage = 'Произошла ошибка. Дедуктивный метод дал сбой.';
+    let errorMessage = 'Произошла ошибка. Дедуктивный метод дал сбой.'
 
     if (error instanceof Error) {
       if (error.message.includes('429')) {
-        errorMessage = 'Элементарно, Ватсон! Слишком много запросов. Подождите минуту.';
+        errorMessage = 'Элементарно, Ватсон! Слишком много запросов. Подождите минуту.'
       } else if (error.message.includes('503')) {
-        errorMessage = 'Модель загружается, подождите 10-20 секунд.';
+        errorMessage = 'Модель загружается, подождите 10-20 секунд.'
       }
     }
 
-    messages.push({ role: 'assistant', content: errorMessage });
-  };
+    store.addMessage({ role: 'assistant', content: errorMessage })
+  }
 
   return {
-    userInput,
-    messages,
-    isLoading,
-    sendMessage
-  };
-};
+    sendMessage,
+  }
+}
